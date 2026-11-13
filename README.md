@@ -1,12 +1,18 @@
 # Fortevom
 
-Fortevom is a C#/PHP preprocessor
+Fortevom is a pretty little language that compiles into C# and PHP.
+
+It's designed to be a glue language for your C# or PHP projects so you can save the verbosity of C# for the parts that actually need it.
+
+The syntax is inspired by Ruby and JavaScript, and is pretty easy to comprehend if you come from either of those.
+
+Naturally, because Fortevom transpiles into C#/PHP, types are required, but this is to avoid any errors or problems if we were to infer the types.
 
 # Syntax
 
 All expressions must end with a semicolon.
 
-Variable declarations:
+## Variable declarations:
 
 `<type> variable = value;`
 
@@ -20,22 +26,25 @@ You can alternatively declare a variable using type inferrence:
 
 `infer number = 96;`
 
+## Comments
+
 Comments are initiated with the ° (degree) symbol. On macOS, you can get this by pressing option-shift-8.
-Unicode: U+00B0
+
+Unicode: `U+00B0`
 
 `° This is a comment `
 
-Writing to STDOUT:
+## Writing to STDOUT:
 
 `write_output("hi");`
 
 This, naturally, will return a string.
 
-Reading from STDIN:
+## Reading from STDIN:
 
 `read_stdin();`
 
-Conditionals:
+## Conditionals:
 
 Conditional blocks must be closed with ends
 
@@ -51,6 +60,8 @@ end
 
 Alternatively is the equivalent of elsif, elseif, or elif;
 Otherwise is the equivalent of else.
+
+### Alternative Conditionals
 
 You can also use the alternate inline conditional. This has the exact same syntax as Ruby:
 
@@ -78,11 +89,11 @@ This is the equivalent of `if var1 == value and var2 =/= value`
 Fortevom uses `=/=` instead of `!=` to represent the "not equals" symbol.
 
 
-Functions:
+## Functions:
 
 Functions are declared using the `fn` keyword:
 
-You must declare a return type
+You must declare a return type for all functions.
 
 ```
 fn functionNAME() => returntype:
@@ -108,7 +119,7 @@ fn someFUNCTION(any argument, any argumentTWO) => string:
 end
 ```
 
-Types
+## Types
 
 Here is the list of types available in Fortevom:
 - uint
@@ -120,7 +131,11 @@ Here is the list of types available in Fortevom:
 - obj
 - any/inferred
 
-Loops:
+Note: if you create a variable with the `inferred` type, this just compiles into `var` in C#  — Fortevom doesn't handle the type inferrence.
+
+When transpiling into PHP, the types are basically cosmetic, as PHP doesn't use types (in most cases).
+
+## Loops:
 
 ```
 while condition do
@@ -139,15 +154,11 @@ for thing in things do
 end 
 ```
 
-Imports:
+## Imports:
 
 `import <thing>`
 
-Alternatively, you can import a specific thing:
-
-`from <folderORfile> import <thing>`
-
-Arrays:
+## Array methods:
 
 `array.length;` => returns the amount of items in an array
 
@@ -165,19 +176,9 @@ Arrays:
 
 `array.tail` => last index
 
-Objects:
+You can also use any C# or PHP method, which will be passed through untouched.
 
-Objects are declared using the obj type and curly brackets.
-
-Keys and values are separated by the `==>` symbol.
-
-```
-obj object = {
-  "key" ==> value 
-}
-```
-
-Error handling:
+## Error handling:
 
 ```
 attempt {
@@ -188,4 +189,20 @@ when EXCEPTIONcode {
 }
 ```
 
-Purified using [Murman](https://github.com/Centurion774477/Murman)
+The exception will be passed through untouched into C# or PHP — Fortevom has no custom exceptions.
+
+# Credits
+
+The syntax of Fortevom was heavily inspired by [Wernasho](https://github.com/werSquared), and the leading force for the development of Fortevom was for his project, [Kyogas](https://github.com/pixelqualitysoftware/kyogas).
+
+The internals of Fortevom, as well as this readme, were created by [Reece Turner](https://github.com/Centurion774477).
+
+The README was purified using [Murman](https://github.com/Centurion774477/Murman).
+
+# Where's the install section?
+
+Fortevom isn't quite ready for use yet, but I'm actively working on getting it ready.
+
+# Yakima
+
+Also see [Yakima](https://github.com/Centurion774477/Yakima), which is a fork of Fortevom meant to be more expressive and a bit more laid back.

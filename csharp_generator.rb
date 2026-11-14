@@ -1,32 +1,32 @@
 
-def csGenerateComment content
-  <<-END
-    // #{comment}
-  END
+def csGenerateComment(content)
+  <<-COMMENT
+    // #{content}
+  COMMENT
 end
 
-def csGenerateVariable type, name, value
-  <<-END
+def csGenerateVariable(type, name, value)
+  <<-VARIABLE
     #{type} #{name} = #{value};
-  END
+  VARIABLE
 end
 
-def csGenerateIf condition
-  <<-END
+def csGenerateIf(condition)
+  <<-IF
     if (#{condition}) {
-  END
+  IF
 end
 
-def csGenerateElseIf condition
-  <<-END
+def csGenerateElseIf(condition)
+  <<-ELSEIF
   } else if (#{condition}) {
-  END
+  ELSEIF
 end
 
 def csGenerateElse
-  <<-END
+  <<-ELSE
   } else {
-  END
+  ELSE
 end
 
 def csGenerateEnd
@@ -35,112 +35,103 @@ def csGenerateEnd
   END
 end
 
-def csGenerateInferredVariable name, value
-  <<-END
+def csGenerateInferredVariable(name, value)
+  <<-INFER
   var #{name} = #{value};
-  END
+  INFER
 end
 
-def csGenerateFunctionCall name, arguments
-  return "Console.WriteLine(#{arguments});" if name == "write_output"
-  return "Console.ReadLine();" if name == "read_stdin"
+def csGenerateFunctionCall(name, arguments)
+  return "Console.WriteLine(#{arguments});" if name == 'write_output'
+  return 'Console.ReadLine();' if name == 'read_stdin'
 
-  <<-END
+  <<-CALL
   name(#{arguments});
-  END
+  CALL
 end
 
-def csGenerateFunctionDeclaration name, arguments, return_type
-  <<-END
+# TODO: This should probably be more complex — just public might not be detailed enough.
+def csGenerateFunctionDeclaration(name, arguments, return_type)
+  <<-DECLARATION
   public #{return_type} #{name}(#{arguments}) {
-  END
+  DECLARATION
 end
 
-def csGenerateWhileLoop condition
-  <<-END
+def csGenerateWhileLoop(condition)
+  <<-WHILE
   while (#{condition}) {
-  END
+  WHILE
 end
 
-def csGenerateForLoop initialization, condition, update
-  <<-END
+def csGenerateForLoop(initialization, condition, update)
+  <<-FOR
   for (#{initialization}; #{condition}; #{update}) {
-  END
+  FOR
 end
 
-def csGenerateForeachLoop iterator, array
-  <<-END
+def csGenerateForeachLoop(iterator, array)
+  <<-FOREACH
   foreach (var #{iterator} in #{array}) {
-  END
+  FOREACH
 end
 
-def csGenerateImport package
-  <<-END
+def csGenerateImport(package)
+  <<-IMPORT
   using #{package};
-  END
+  IMPORT
 end
 
-def csGenerateImportFrom package, thing
+def csGenerateImportFrom(package, _thing)
   # I don't think C# has an import x from y feature
-  <<-END
+  <<-IMPORT
   using #{package};
-  END
+  IMPORT
 end
 
-def transpileMethodIntoCsharp method
+# handle all the methods that aren't supported in the C# version
+def transpileMethodIntoCsharp(method)
+  abort 'Sorry, but when transpiling Fortevom into C#, the method pushTAIL is not supported.' if method == 'pushTAIL'
 
-  # handle all the methods that aren't supported in the C# version
+  abort 'Sorry, but when transpiling Fortevom into C#, the method pushHEAD is not supported.' if method == 'pushHEAD'
 
-  if method == "pushTAIL"
-    puts "Sorry, but when transpiling Fortevom into C#, the method pushTAIL is not supported."
-    exit
-  end
+  abort 'Sorry, but when transpiling Fortevom into C#, the method pushHEAD is not supported.' if method == 'pushHEAD'
 
-  if method == "pushHEAD"
-    puts "Sorry, but when transpiling Fortevom into C#, the method pushHEAD is not supported."
-    exit
-  end
-
-  if method == "pushHEAD"
-    puts "Sorry, but when transpiling Fortevom into C#, the method pushHEAD is not supported."
-    exit
-  end
-
-  return case method
-  when "length" then "Length"
-  when "find"   then "Find"
+  case method
+  when 'length' then 'Length'
+  when 'find'   then 'Find'
   else method
   end
 end
 
-def csGenerateMethod variable, method
-  if method == "head" then return "#{variable}[0]" end
-  if method == "tail" then return "#{variable}[#{variable}.Length - 1]" end
+def csGenerateMethod(variable, method)
+  # preprocess method if it's a custom Fortevom method
+  return "#{variable}[0]" if method == 'head'
+  return "#{variable}[#{variable}.Length - 1]" if method == 'tail'
 
   transpiledMethod = transpileMethodIntoCsharp method
 
-  return <<-END
+  <<-METHOD
     #{variable}.#{transpiledMethod};
-  END
+  METHOD
 end
 
 def csGenerateAttempt
-  <<-END
+  <<-ATTEMPT
     try {
-  END
+  ATTEMPT
 end
 
-def csGenerateCatchException exception
-  # this might throw a warning if you pull down throwawayException but don't use it.
-  # I'm not sure if C# lets you capture specific exceptions while not pulling down a variable though.
-  <<-END
+def csGenerateCatchException(exception)
+  # this might throw a warning (if not an error) if you pull down throwawayException but don't use it.
+  # I'm not sure if C# lets you capture specific exceptions while not pulling down a variable, though.
+  <<-CATCH
   } (#{exception} throwawayException) {
-  END
+  CATCH
 end
 
-def csGenerateNamedException exception, name
-  <<-END
+def csGenerateNamedException(exception, name)
+  <<-CATCH
   } (#{exception} #{name}) {
-  END
+  CATCH
 end
 

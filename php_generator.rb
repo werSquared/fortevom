@@ -1,33 +1,33 @@
 
-def phpGenerateComment comment
-  <<-END
+def phpGenerateComment(comment)
+  <<-COMMENT
     # #{comment}
-  END
+  COMMENT
 end
 
-def phpGenerateVariable type, name, value
-  # type isn't used but it's needed in the C# version and the parser doesn't know which one is going to be called
-  <<-END
+def phpGenerateVariable(_type, name, value)
+  # type isn't used, but it's necessary in the C# version, and the parser doesn't know which one is going to be called
+  <<-VAR
   $#{name} = #{value};
-  END
+  VAR
 end
 
-def phpGenerateIf condition
-  <<-END
+def phpGenerateIf(condition)
+  <<-IF
   if (#{condition}) {
-  END
+  IF
 end
 
-def phpGenerateElseIf condition
-  <<-END
+def phpGenerateElseIf(condition)
+  <<-ELSEIF
   } elseif (#{condition}) {
-  END
+  ELSEIF
 end
 
 def phpGenerateElse
-  <<-END
+  <<-ELSE
 } else {
-  END
+  ELSE
 end
 
 def phpGenerateEnd
@@ -36,99 +36,101 @@ def phpGenerateEnd
   END
 end
 
-def phpGenerateInferredVariable name, value
-  <<-END
+def phpGenerateInferredVariable(name, value)
+  <<-INFER
   $#{name} = #{value};
-  END
+  INFER
 end
 
-def phpGenerateFunctionCall name, arguments
-  # check if its a fortevom function like write_output() or read_stdin()
-  return "echo #{arguments}"   if name == "write_output"
-  return "readline()"          if name == "read_stdin"
+def phpGenerateFunctionCall(name, arguments)
+  # check if it's a fortevom function like write_output() or read_stdin()
+  return "echo #{arguments}" if name == 'write_output'
+  return 'readline()' if name == 'read_stdin'
 
-  <<-END
+  <<-CALL
   #{name}(#{arguments})
-  END
+  CALL
 end
 
-def phpGenerateFunctionDeclaration name, arguments
-  <<-END
+def phpGenerateFunctionDeclaration(name, arguments)
+  <<-DECLARATION
   function #{name} (#{arguments})
-  END
+  DECLARATION
 end
 
-def phpGenerateWhileLoop condition
+def phpGenerateWhileLoop(condition)
   # if the user is checking for a boolean value or a variable
   if condition =~ /^\w+$/
-    return <<-END
+    return <<-WHILE
     while ($#{condition}) {
-    END
+    WHILE
   end
-  <<-END
+
+  <<-WHILE
   while (#{condition}) {
-  END
+  WHILE
 end
 
-def phpGenerateForLoop initialization, condition, update
-  # NEEDS TESTING
-  <<-END
+# TODO: I believe this is wrong
+# I'm pretty sure PHP has real for loops.
+def phpGenerateForLoop(initialization, condition, update)
+  <<-FOR
   $#{initialization};
-  while ($#{condition.lstrip()}) {
+  while ($#{condition}) {
   $#{update}
-  END
+  FOR
 end
 
-def phpGenerateForeachLoop iterator, array
-  <<-END
+def phpGenerateForeachLoop(iterator, array)
+  <<-FOREACH
   foreach ($#{array} as $#{iterator}) {
-  END
+  FOREACH
 end
 
-def phpGenerateImport package
-  return "// PHP doesn't have imports! -- Fortevom" # doesn't exist in PHP
+def phpGenerateImport(_package)
+  "// PHP doesn't have imports! — Fortevom" # doesn't exist in PHP
 end
 
-def phpGenerateImportFrom package, thing
-  return "// PHP doesn't have imports! -- Fortevom" # doesn't exist in PHP either
+def phpGenerateImportFrom(_package, _thing)
+  "// PHP doesn't have imports! — Fortevom" # doesn't exist in PHP either
 end
 
-def transpileMethodIntoPhp method
+def transpileMethodIntoPhp(method)
   return case method
-  when "length"   then "count"
-  when "pushTAIL" then "array_push"
-  when "pushHEAD" then "array_unshift"
-  when "find"     then "array_search"
-  when "head"     then "array_last"
-  when "tail"     then "array_first"
-  else method # assume that the method is some other PHP method instead of throwing an error
-  end
+         when 'length'   then 'count'
+         when 'pushTAIL' then 'array_push'
+         when 'pushHEAD' then 'array_unshift'
+         when 'find'     then 'array_search'
+         when 'head'     then 'array_last'
+         when 'tail'     then 'array_first'
+         else method # assume that the method is some other PHP method instead of throwing an error
+         end
 end
 
-def phpGenerateMethod variable, method, arguments
+def phpGenerateMethod(variable, method, arguments)
   # array[i] will not reach this function, so I need to figure that out.
   method = transpileMethodIntoPhp method
-  if arguments == "" || arguments == " " # this check may not work; it's checking if this method is called with arguments
-    return "#{method}(#{variable})"
+  if ['', ' '].include? arguments # this check may not work; it's checking if this method is called with arguments
+    "#{method}(#{variable})"
   else
-    return "#{method}(#{variable}, #{arguments})"
+    "#{method}(#{variable}, #{arguments})"
   end
 end
 
 def phpGenerateAttempt
-  <<-END
+  <<-ATTEMPT
   try {
-  END
+  ATTEMPT
 end
 
-def phpGenerateCatchException exception
-  <<-END
+def phpGenerateCatchException(exception)
+  <<-CATCH
 } catch (#{exception}) {
-  END
+  CATCH
 end
 
-def phpGenerateNamedException exception, name
-  <<-END
+def phpGenerateNamedException(exception, name)
+  <<-CATCH
 } catch (#{exception} #{name}) {
-  END
+  CATCH
 end

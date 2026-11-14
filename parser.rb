@@ -1,89 +1,50 @@
-
-require_relative "csharp_generator"
-require_relative "php_generator"
-require_relative "lexer"
+require_relative 'csharp_generator'
+require_relative 'php_generator'
+require_relative 'lexer'
 
 class Parser
   def initialize
-    @recognized_types  = %w|uint int boolean float string char obj any|
+    @recognized_types = %w[uint int boolean float string char obj any]
   end
-  
-  # this will need to be refactored to support nesting
 
-  def parse token, output_language, line_number
-    # remember to turn =/= into !=
-    # PHP should also be !== instead for strict comparison
+  # TODO: this will need to be refactored to support nesting
 
+  def parse(token, output_language, line_number)
     # puts "DEBUG:"
     # pp token
     # puts token[:type]
 
-    snippet = case token[:type]
-    when :comment
-      return send("#{output_language}GenerateComment", token[:comment])
+    case token[:type]
+    when :comment then send("#{output_language}GenerateComment", token[:comment])
+
     when :variable_creation
       unless @recognized_types.include?(token[:var_type])
-        puts "Invalid type assigned to #{token[:name]}: #{token[:var_type]} on line ~#{line_number}" 
-        exit
+        abort "Invalid type assigned to #{token[:name]}: #{token[:var_type]} on line ~#{line_number}"
       end
 
-      return send("#{output_language}GenerateVariable", token[:var_type], token[:name], token[:value])
+      send("#{output_language}GenerateVariable", token[:var_type], token[:name], token[:value])
 
-    when :if_condition
-      return send("#{output_language}GenerateIf", token[:condition])
+    when :if_condition          then send("#{output_language}GenerateIf", token[:condition])
+    when :alternative_condition then send("#{output_language}GenerateElseIf", token[:condition])
+    when :otherwise_condition   then send("#{output_language}GenerateElse")
+    when :end                   then send("#{output_language}GenerateEnd")
 
-    when :alternative_condition
-      return send("#{output_language}GenerateElseIf", token[:condition])
+    when :inferred_variable_creation then send("#{output_language}GenerateInferredVariable", token[:name], token[:value])
 
-    when :otherwise_condition
-      return send("#{output_language}GenerateElse")
-
-    when :end
-      return send("#{output_language}GenerateEnd")
-
-    when :inferred_variable_creation
-      return send("#{output_language}GenerateInferredVariable", token[:name], token[:value])
-
-    when :function_call
-      return send("#{output_language}GenerateFunctionCall", token[:function_name], token[:arguments])
-
-    when :function_declaration
-      return send("#{output_language}GenerateFunctionDeclaration", token [:function_name], token[:arguments], token[:return_type])
-
-    when :while_loop
-      return send("#{output_language}GenerateWhileLoop", token[:condition])
-
-    when :for_loop
-      return send("#{output_language}GenerateForLoop", token[:initialization], token[:condition], token[:update])
-
-    when :foreach_loop
-      return send("#{output_language}GenerateForeachLoop", token[:iterator], token[:array])
-
-    when :import
-      return send("#{output_language}GenerateImport", token[:package])
-
-    when :import_as
-      return send("#{output_language}GenerateImportFrom", token[:package], token[:thing])
-
-    when :method
-      return send("#{output_language}GenerateMethod", token[:variable], token[:method], token[:arguments])
-
-    when :open_attempt_block      
-      return send("#{output_language}GenerateAttempt")
-
-    when :unnamed_when_arm
-      return send("#{output_language}GenerateCatchException", token[:exception])
-
-    when :named_when_arm
-      return send("#{output_language}GenerateNamedException", token[:exception], token[:name])
-
-    when :blank_line
-      return "\n"
+    when :function_call        then send("#{output_language}GenerateFunctionCall", token[:function_name], token[:arguments])
+    when :function_declaration then send("#{output_language}GenerateFunctionDeclaration", token [:function_name], token[:arguments], token[:return_type])
+    when :while_loop           then send("#{output_language}GenerateWhileLoop", token[:condition])
+    when :for_loop             then send("#{output_language}GenerateForLoop", token[:initialization], token[:condition], token[:update])
+    when :foreach_loop         then send("#{output_language}GenerateForeachLoop", token[:iterator], token[:array])
+    when :import               then send("#{output_language}GenerateImport", token[:package])
+    when :import_as            then send("#{output_language}GenerateImportFrom", token[:package], token[:thing])
+    when :method               then send("#{output_language}GenerateMethod", token[:variable], token[:method], token[:arguments])
+    when :open_attempt_block   then send("#{output_language}GenerateAttempt")
+    when :unnamed_when_arm     then send("#{output_language}GenerateCatchException", token[:exception])
+    when :named_when_arm       then send("#{output_language}GenerateNamedException", token[:exception], token[:name])
+    when :blank_line           then "\n"
     else
-      puts "Unrecognized token on line #{line_number}: #{token}"
-      exit
+      abort "Unrecognized token on line #{line_number}: #{token}"
     end
-    
-    return snippet
   end
 end

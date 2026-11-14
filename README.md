@@ -84,10 +84,7 @@ This is the equivalent of `if var1 == value and var2 == value`
 
 `if var1 == value and var2 doesnt then ...`
 
-This is the equivalent of `if var1 == value and var2 =/= value`
-
-Fortevom uses `=/=` instead of `!=` to represent the "not equals" symbol.
-
+This is the equivalent of `if var1 == value and var2 != value`
 
 ## Functions:
 

@@ -1,30 +1,27 @@
-
-
-def getLines file
-  unless File.exist? file
-    puts "The given file doesn't exist in this context: #{file}"
-    exit
+def get_lines(from:)
+  unless File.exist? from
+    abort "The given file doesn't exist in this context: #{from}"
   end
 
   lines = nil
 
   begin
-    lines = File.readlines file
-  rescue => error
-    puts "Failed to read the file #{file}. Error: #{error}"
+    lines = File.readlines from
+  rescue StandardError => e
+    puts "Failed to read the file #{from}. Error: #{e}"
   end
 
-  return lines
+  lines
 end
 
-def getExpressions line
-  # split each line by semicolons
-  return line.split(';').map { |expr| expr.strip.split.join(' ') }
+# split each line by semicolons
+def get_expressions(from:)
+  from.split(';').map { |expr| expr.strip.split.join(' ') }
 end
 
 # returns a hash containing the data about the given expression
 def lex expression
-  return case expression
+  case expression
   when /°(?<comment>.*)/
     {
       type: :comment,

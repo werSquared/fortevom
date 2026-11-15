@@ -1,48 +1,48 @@
 
-def phpGenerateComment(comment)
+def php_generate_comment(comment)
   <<-COMMENT
     # #{comment}
   COMMENT
 end
 
-def phpGenerateVariable(_type, name, value)
+def php_generate_variable(_type, name, value)
   # type isn't used, but it's necessary in the C# version, and the parser doesn't know which one is going to be called
   <<-VAR
   $#{name} = #{value};
   VAR
 end
 
-def phpGenerateIf(condition)
+def php_generate_if(condition)
   <<-IF
   if (#{condition}) {
   IF
 end
 
-def phpGenerateElseIf(condition)
+def php_generate_elseif(condition)
   <<-ELSEIF
   } elseif (#{condition}) {
   ELSEIF
 end
 
-def phpGenerateElse
+def php_generate_else
   <<-ELSE
 } else {
   ELSE
 end
 
-def phpGenerateEnd
+def php_generate_end
   <<-END
 }
   END
 end
 
-def phpGenerateInferredVariable(name, value)
+def php_generate_inferred_variable(name, value)
   <<-INFER
   $#{name} = #{value};
   INFER
 end
 
-def phpGenerateFunctionCall(name, arguments)
+def php_generate_function_call(name, arguments)
   # check if it's a fortevom function like write_output() or read_stdin()
   return "echo #{arguments}" if name == 'write_output'
   return 'readline()' if name == 'read_stdin'
@@ -52,13 +52,13 @@ def phpGenerateFunctionCall(name, arguments)
   CALL
 end
 
-def phpGenerateFunctionDeclaration(name, arguments)
+def php_generate_function_declaration(name, arguments)
   <<-DECLARATION
   function #{name} (#{arguments})
   DECLARATION
 end
 
-def phpGenerateWhileLoop(condition)
+def php_generate_while_loop(condition)
   # if the user is checking for a boolean value or a variable
   if condition =~ /^\w+$/
     return <<-WHILE
@@ -71,9 +71,9 @@ def phpGenerateWhileLoop(condition)
   WHILE
 end
 
-# TODO: I believe this is wrong
+# TODO: I believe this is wrong —
 # I'm pretty sure PHP has real for loops.
-def phpGenerateForLoop(initialization, condition, update)
+def php_generate_for_loop(initialization, condition, update)
   <<-FOR
   $#{initialization};
   while ($#{condition}) {
@@ -81,35 +81,37 @@ def phpGenerateForLoop(initialization, condition, update)
   FOR
 end
 
-def phpGenerateForeachLoop(iterator, array)
+def php_generate_foreach_loop(iterator, array)
   <<-FOREACH
   foreach ($#{array} as $#{iterator}) {
   FOREACH
 end
 
-def phpGenerateImport(_package)
+def php_generate_import(_package)
+  # TODO: throw an error instead of just writing a comment
   "// PHP doesn't have imports! — Fortevom" # doesn't exist in PHP
 end
 
-def phpGenerateImportFrom(_package, _thing)
+def php_generate_import_from(_package, _thing)
+  # TODO: throw an error instead of just writing a comment
   "// PHP doesn't have imports! — Fortevom" # doesn't exist in PHP either
 end
 
-def transpileMethodIntoPhp(method)
-  return case method
-         when 'length'   then 'count'
-         when 'pushTAIL' then 'array_push'
-         when 'pushHEAD' then 'array_unshift'
-         when 'find'     then 'array_search'
-         when 'head'     then 'array_last'
-         when 'tail'     then 'array_first'
-         else method # assume that the method is some other PHP method instead of throwing an error
-         end
+def transpile_method_into_php(method)
+  case method
+  when 'length'   then 'count'
+  when 'pushTAIL' then 'array_push'
+  when 'pushHEAD' then 'array_unshift'
+  when 'find'     then 'array_search'
+  when 'head'     then 'array_last'
+  when 'tail'     then 'array_first'
+  else method # assume that the method is some other PHP method instead of throwing an error
+  end
 end
 
-def phpGenerateMethod(variable, method, arguments)
+def php_generate_method(variable, method, arguments)
   # array[i] will not reach this function, so I need to figure that out.
-  method = transpileMethodIntoPhp method
+  method = transpile_method_into_php method
   if ['', ' '].include? arguments # this check may not work; it's checking if this method is called with arguments
     "#{method}(#{variable})"
   else
@@ -117,19 +119,19 @@ def phpGenerateMethod(variable, method, arguments)
   end
 end
 
-def phpGenerateAttempt
+def php_generate_attempt
   <<-ATTEMPT
   try {
   ATTEMPT
 end
 
-def phpGenerateCatchException(exception)
+def php_generate_catch_exception(exception)
   <<-CATCH
 } catch (#{exception}) {
   CATCH
 end
 
-def phpGenerateNamedException(exception, name)
+def php_generate_named_exception(exception, name)
   <<-CATCH
 } catch (#{exception} #{name}) {
   CATCH
